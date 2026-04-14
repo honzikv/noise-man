@@ -67,6 +67,18 @@ const SOUNDS: {
     label: "Forest Wind",
     color: "from-emerald-500 to-green-800",
   },
+  {
+    id: "blue",
+    icon: Wind,
+    label: "Blue Noise",
+    color: "from-blue-500 to-cyan-500",
+  },
+  {
+    id: "violet",
+    icon: Wind,
+    label: "Violet Noise",
+    color: "from-purple-500 to-fuchsia-500",
+  },
 ];
 
 export default function App() {
@@ -79,6 +91,8 @@ export default function App() {
     ocean: 0,
     space: 0,
     forest: 0,
+    blue: 0,
+    violet: 0,
   });
   const [isExporting, setIsExporting] = useState(false);
 

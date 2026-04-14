@@ -5,7 +5,9 @@ export type SoundType =
   | "rain"
   | "ocean"
   | "space"
-  | "forest";
+  | "forest"
+  | "blue"
+  | "violet";
 
 export class AudioEngine {
   ctx: AudioContext | null = null;
@@ -22,14 +24,22 @@ export class AudioEngine {
       this.masterGain = this.ctx.createGain();
       this.masterGain.connect(this.ctx.destination);
 
-      ["white", "pink", "brown", "rain", "ocean", "space", "forest"].forEach(
-        (type) => {
-          const gain = this.ctx!.createGain();
-          gain.gain.value = 0; // Start muted
-          gain.connect(this.masterGain!);
-          this.nodes.set(type as SoundType, { source: null, gain });
-        },
-      );
+      [
+        "white",
+        "pink",
+        "brown",
+        "rain",
+        "ocean",
+        "space",
+        "forest",
+        "blue",
+        "violet",
+      ].forEach((type) => {
+        const gain = this.ctx!.createGain();
+        gain.gain.value = 0; // Start muted
+        gain.connect(this.masterGain!);
+        this.nodes.set(type as SoundType, { source: null, gain });
+      });
     }
     if (this.ctx.state === "suspended") {
       this.ctx.resume();
@@ -175,6 +185,31 @@ export class AudioEngine {
       nodeData.source = noise;
       noise.start();
       lfo.start();
+    } else if (type === "blue") {
+      const noise = this.createNoise("white");
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = "highpass";
+      filter.frequency.value = 2000;
+      noise.connect(filter);
+      source = filter;
+      nodeData.source = noise;
+      noise.start();
+    } else if (type === "violet") {
+      const bufferSize = this.ctx.sampleRate * 2;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let lastW = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const w = Math.random() * 2 - 1;
+        data[i] = (w - lastW) * 0.5;
+        lastW = w;
+      }
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+      source = noise;
+      nodeData.source = noise;
+      noise.start();
     } else {
       const noise = this.createNoise("white");
       source = noise;
