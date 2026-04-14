@@ -1,0 +1,27 @@
+{
+  "name": "noise-man",
+  "version": "1.0.0",
+  "description": "A web application for generating ambient noise for focus, relaxation, and sleep.",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.2"
+  },
+  "lint-staged": {
+    "backend/**/*.py": [
+      "cd backend && uv run ruff check --fix",
+      "cd backend && uv run ruff format",
+      "cd backend && uv run mypy --strict"
+    ],
+    "frontend/**/*.{ts,tsx,js,jsx}": [
+      "prettier --write",
+      "cd frontend && npm run lint"
+    ],
+    "frontend/**/*.{css,scss}": [
+      "prettier --write"
+    ]
+  }
+}
