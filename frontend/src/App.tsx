@@ -95,13 +95,25 @@ export default function App() {
     violet: 0,
   });
   const [isExporting, setIsExporting] = useState(false);
+  const [intensity, setIntensity] = useState(0);
 
   const engineRef = useRef<AudioEngine | null>(null);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     engineRef.current = new AudioEngine();
+
+    const updateIntensity = () => {
+      if (engineRef.current) {
+        setIntensity(engineRef.current.getIntensity());
+      }
+      rafRef.current = requestAnimationFrame(updateIntensity);
+    };
+    rafRef.current = requestAnimationFrame(updateIntensity);
+
     return () => {
       engineRef.current?.stopAll();
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, []);
 
@@ -167,11 +179,31 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-[#F8FAFC] flex flex-col items-center p-4 font-sans relative overflow-hidden">
-      {/* Animated Gradient Background */}
-      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#10B981] blur-[120px] mix-blend-screen animate-[pulse_8s_ease-in-out_infinite]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#8B5CF6] blur-[150px] mix-blend-screen animate-[pulse_10s_ease-in-out_infinite_reverse]" />
+    <div
+      className="min-h-screen text-[#F8FAFC] flex flex-col items-center p-4 font-sans relative overflow-hidden transition-colors duration-200"
+      style={{
+        backgroundColor: `rgba(${15 + intensity * 20}, ${23 + intensity * 40}, ${42 + intensity * 60}, 1)`,
+      }}
+    >
+      {/* Animated Gradient Background reacting to audio intensity */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none overflow-hidden transition-opacity duration-200"
+        style={{ opacity: 0.2 + intensity * 0.5 }}
+      >
+        <div
+          className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#10B981] mix-blend-screen animate-[pulse_8s_ease-in-out_infinite] transition-all duration-75"
+          style={{
+            filter: `blur(${120 - intensity * 60}px)`,
+            transform: `scale(${1 + intensity * 0.5})`,
+          }}
+        />
+        <div
+          className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#8B5CF6] mix-blend-screen animate-[pulse_10s_ease-in-out_infinite_reverse] transition-all duration-75"
+          style={{
+            filter: `blur(${150 - intensity * 80}px)`,
+            transform: `scale(${1 + intensity * 0.6})`,
+          }}
+        />
       </div>
 
       <header className="relative z-10 mt-8 mb-12 text-center">

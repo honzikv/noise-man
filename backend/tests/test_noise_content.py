@@ -8,7 +8,7 @@ client = TestClient(app)
 
 
 def test_noise_is_not_silent():
-    types = ["white", "pink", "brown", "rain", "ocean"]
+    types = ["white", "pink", "brown", "rain", "ocean", "space", "forest", "blue", "violet"]
     for t in types:
         payload = {"tracks": [{"type": t, "volume": 1.0}], "duration_seconds": 1}
         response = client.post("/api/v1/export", json=payload)

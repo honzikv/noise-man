@@ -140,6 +140,8 @@ def generate_forest(num_samples: int, sample_rate: int = 44100) -> np.ndarray:
 @app.post("/api/v1/export")
 def export_mix(req: ExportRequest) -> Response:
     # Increased to 10 minutes (600s) for loopable Youtube videos
+    if req.duration_seconds <= 0:
+        raise HTTPException(status_code=400, detail="Duration must be positive.")
     if req.duration_seconds > 600:
         raise HTTPException(status_code=400, detail="Duration too long. Max 600s.")
     if not req.tracks:

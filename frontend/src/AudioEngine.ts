@@ -19,10 +19,18 @@ export class AudioEngine {
   init() {
     if (!this.ctx) {
       this.ctx = new (
-        window.AudioContext || (window as any).webkitAudioContext
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext
       )();
+
+      this.analyser = this.ctx.createAnalyser();
+      this.analyser.fftSize = 256;
+      this.analyser.smoothingTimeConstant = 0.8;
+
       this.masterGain = this.ctx.createGain();
-      this.masterGain.connect(this.ctx.destination);
+      this.masterGain.connect(this.analyser);
+      this.analyser.connect(this.ctx.destination);
 
       [
         "white",

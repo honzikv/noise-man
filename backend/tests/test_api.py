@@ -44,7 +44,7 @@ async def test_export_no_tracks():
 
 @pytest.mark.anyio
 async def test_export_all_types():
-    types = ["white", "pink", "brown", "rain", "ocean", "space", "forest"]
+    types = ["white", "pink", "brown", "rain", "ocean", "space", "forest", "blue", "violet"]
     tracks = [{"type": t, "volume": 0.1} for t in types]
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:

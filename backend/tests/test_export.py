@@ -15,7 +15,7 @@ def test_export_success():
     assert response.status_code == 200
     assert response.headers["content-type"] == "audio/wav"
     assert (
-        "attachment; filename=noise-mix-5s.wav"
+        "attachment; filename=loopable-mix-5s.wav"
         in response.headers["content-disposition"]
     )
 
@@ -37,16 +37,14 @@ def test_export_empty_tracks():
 
 
 def test_export_duration_too_long():
-    payload = {"tracks": [{"type": "white", "volume": 0.5}], "duration_seconds": 4000}
+    payload = {"tracks": [{"type": "white", "volume": 0.5}], "duration_seconds": 601}
     response = client.post("/api/v1/export", json=payload)
     assert response.status_code == 400
-    assert response.json()["detail"] == "Duration too long. Max 3600s."
+    assert response.json()["detail"] == "Duration too long. Max 600s."
 
 
 def test_export_invalid_track_type():
     # The code says if type is unknown, it uses zeros.
-    # Let's verify it still returns 200 but maybe check if it's silent?
-    # Or should it be an error? Current implementation uses np.zeros.
     payload = {
         "tracks": [{"type": "invalid_type", "volume": 0.5}],
         "duration_seconds": 1,
@@ -70,26 +68,22 @@ def test_export_volume_zero():
 
 
 def test_all_noise_types():
-    types = ["white", "pink", "brown", "rain", "ocean"]
+    types = ["white", "pink", "brown", "rain", "ocean", "space", "forest", "blue", "violet"]
     for t in types:
         payload = {"tracks": [{"type": t, "volume": 0.5}], "duration_seconds": 1}
         response = client.post("/api/v1/export", json=payload)
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Failed for type {t}"
 
 
 def test_export_zero_duration():
     payload = {"tracks": [{"type": "white", "volume": 0.5}], "duration_seconds": 0}
     response = client.post("/api/v1/export", json=payload)
-    # Depending on implementation, this might fail or return an empty WAV.
-    # In the code: num_samples = int(sample_rate * 0) = 0.
-    # mix = np.zeros(0).
-    # wave module might complain about 0 frames.
-    assert response.status_code == 200 or response.status_code == 400
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Duration must be positive."
 
 
 def test_export_negative_duration():
     payload = {"tracks": [{"type": "white", "volume": 0.5}], "duration_seconds": -5}
     response = client.post("/api/v1/export", json=payload)
-    # int(44100 * -5) = -220500.
-    # np.zeros(-220500) will raise ValueError.
     assert response.status_code == 400
+    assert response.json()["detail"] == "Duration must be positive."

@@ -39,7 +39,8 @@ class MockAudioContext {
   currentTime = 0;
 }
 
-(window as any).AudioContext = MockAudioContext;
+(window as unknown as { AudioContext: typeof MockAudioContext }).AudioContext =
+  MockAudioContext;
 
 describe("App", () => {
   beforeEach(() => {
@@ -54,6 +55,24 @@ describe("App", () => {
     expect(screen.getByText(/Focus/)).toBeInTheDocument();
     expect(screen.getByText(/Mixer/)).toBeInTheDocument();
     expect(screen.getByText("Export 10m Loop (WAV)")).toBeInTheDocument();
+  });
+
+  it("renders all noise types", () => {
+    render(<App />);
+    const expectedTypes = [
+      "Smooth White Noise",
+      "Smooth Pink Noise",
+      "Deep Brown Noise",
+      "Light Rain",
+      "Ocean Waves",
+      "Deep Space",
+      "Forest Wind",
+      "Blue Noise",
+      "Violet Noise",
+    ];
+    expectedTypes.forEach((type) => {
+      expect(screen.getByText(type)).toBeInTheDocument();
+    });
   });
 
   it("toggles playback", () => {
@@ -76,6 +95,7 @@ describe("App", () => {
 
     render(<App />);
 
+    // At least one sound must be on for export to work (pink is on by default at 50%)
     const exportButton = screen.getByText("Export 10m Loop (WAV)");
     fireEvent.click(exportButton);
 
@@ -112,6 +132,7 @@ describe("App", () => {
   it("updates volumes", () => {
     render(<App />);
     const sliders = screen.getAllByRole("slider");
+    // Change Ocean Waves slider (index 4)
     fireEvent.change(sliders[4], { target: { value: "75" } });
 
     expect(screen.getByText("75%")).toBeInTheDocument();
